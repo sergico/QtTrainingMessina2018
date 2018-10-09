@@ -9,11 +9,16 @@ class EventDrivenThread : public QThread
     Q_OBJECT
 
 private:
-    void doSomeWork();
+    //void doSomeWork();
+
+signals:
+    void jobDoneSignal();
 
 protected slots:
     void onStartedSlot();
     void onFinishedSlot();
+
+    void doSomeWork();
 
 protected:
     void run();

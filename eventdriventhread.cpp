@@ -17,7 +17,7 @@ EventDrivenThread::EventDrivenThread(const QString i_threadName)
 
 void EventDrivenThread::doSomeWork()
 {
-    for (qint64 i = 0; i < 10; i++)
+    for (qint64 i = 0; i < 5; i++)
     {
         QString s("[%1][%2] %3 sheeps... and counting");
         qDebug() << s.arg(this->objectName())
@@ -27,6 +27,8 @@ void EventDrivenThread::doSomeWork()
     }
 
     qDebug() << "job Done";
+    /* someone could catcth and manage this one */
+    emit jobDoneSignal();
 }
 
 
@@ -43,6 +45,7 @@ void EventDrivenThread::onFinishedSlot()
     qDebug() << s.arg(this->objectName())
                  .arg(QThread::currentThread()->objectName());
 }
+
 
 void EventDrivenThread::run()
 {
