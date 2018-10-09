@@ -37,6 +37,7 @@ void EventDrivenThread::onStartedSlot()
     QString s("[%1][%2] thread started");
     qDebug() << s.arg(this->objectName())
                  .arg(QThread::currentThread()->objectName());
+    doSomeWork();
 }
 
 void EventDrivenThread::onFinishedSlot()
@@ -52,6 +53,4 @@ void EventDrivenThread::run()
     QString s("[%1][%2] thread event-loop");
     qDebug() << s.arg(this->objectName())
                  .arg(QThread::currentThread()->objectName());
-
-    doSomeWork();
 }
