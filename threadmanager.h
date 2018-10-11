@@ -16,23 +16,14 @@ class ThreadManager : public QObject
 signals:
     void triggerThreadJobSignal();
 
+protected slots:
+
 public:
     ThreadManager() :
         m_theFirstThread("T_FIRST")
     {
-        // create a thread
+        // start the thread
         m_theFirstThread.start();
-
-        connect( this,            SIGNAL(triggerThreadJobSignal()),
-                 &m_theFirstThread, SLOT(onTriggerThreadJobSlot()), Qt::QueuedConnection);
-
-        while ( !m_theFirstThread.isRunning() )
-        {
-            QThread::usleep(10);
-            qDebug() << ".";
-        }
-        emit triggerThreadJobSignal();
-
     }
 };
 

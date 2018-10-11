@@ -4,7 +4,8 @@
 #include <QDateTime>
 #include <QTimer>
 
-SimpleThread::SimpleThread(const QString &i_threadName)
+SimpleThread::SimpleThread(const QString &i_threadName) :
+    m_timerPtr(nullptr)
 {
     // init random seed
     qsrand( static_cast<quint32>(QDateTime::currentMSecsSinceEpoch()) );
@@ -17,11 +18,6 @@ SimpleThread::SimpleThread(const QString &i_threadName)
     QString s("[%1][%2] thread created");
     qDebug() << s.arg(this->objectName())
                  .arg(QThread::currentThread()->objectName());
-}
-
-void SimpleThread::onTriggerThreadJobSlot()
-{
-    doSomeWork();
 }
 
 void SimpleThread::doSomeWork()
@@ -59,12 +55,16 @@ void SimpleThread::onFinishedSlot()
                  .arg(QThread::currentThread()->objectName());
 }
 
-
 void SimpleThread::run()
 {
     QString s("[%1][%2] thread run()");
     qDebug() << s.arg(this->objectName())
                  .arg(QThread::currentThread()->objectName());
+
+    m_timerPtr = new QTimer;
+    m_timerPtr->setSingleShot(true);
+    connect( m_timerPtr, SIGNAL(timeout()), SLOT(doSomeWork()), Qt::QueuedConnection );
+    m_timerPtr->start(1000);
 
     exec();
 }

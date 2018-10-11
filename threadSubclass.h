@@ -3,22 +3,24 @@
 
 #include <QThread>
 #include <QString>
+#include <QTimer>
 
 class SimpleThread : public QThread
 {
     Q_OBJECT
 
+    QTimer* m_timerPtr;
+
 signals:
     void jobDoneSignal();
 
 private:
-    void doSomeWork();
 
 protected slots:
     void onStartedSlot();
     void onFinishedSlot();
 
-    void onTriggerThreadJobSlot();
+    void doSomeWork();
 
 protected:
     /* reimplement with your thread code */
