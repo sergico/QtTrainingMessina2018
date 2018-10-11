@@ -63,7 +63,7 @@ void SimpleThread::run()
 
     m_timerPtr = new QTimer;
     m_timerPtr->setSingleShot(true);
-    connect( m_timerPtr, SIGNAL(timeout()), SLOT(doSomeWork()), Qt::QueuedConnection );
+    connect( m_timerPtr, SIGNAL(timeout()), SLOT(doSomeWork()), Qt::DirectConnection );
     m_timerPtr->start(1000);
 
     exec();
