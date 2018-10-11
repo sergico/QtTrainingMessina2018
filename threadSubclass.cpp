@@ -1,4 +1,4 @@
-#include "eventdriventhread.h"
+#include "threadSubclass.h"
 #include <QDebug>
 
 #include <QTimer>
