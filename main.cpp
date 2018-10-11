@@ -7,12 +7,15 @@ int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
 
+    // name main thread
     QThread::currentThread()->setObjectName("T_MAIN");
 
-    EventDrivenThread theFirstThread("T_FIRST");
+    // create a thread
+    SimpleThread theFirstThread("T_FIRST");
     theFirstThread.start();
 
-    EventDrivenThread theSecondThread("T_SECOND");
+    // craete another thread
+    SimpleThread theSecondThread("T_SECOND");
     theSecondThread.start();
 
     return a.exec();

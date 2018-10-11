@@ -1,15 +1,12 @@
-#ifndef EVENTDRIVENTHREAD_H
-#define EVENTDRIVENTHREAD_H
+#ifndef SIMPLETHREAD_H
+#define SIMPLETHREAD_H
 
 #include <QThread>
 #include <QString>
 
-class EventDrivenThread : public QThread
+class SimpleThread : public QThread
 {
     Q_OBJECT
-
-private:
-    //void doSomeWork();
 
 signals:
     void jobDoneSignal();
@@ -21,10 +18,11 @@ protected slots:
     void doSomeWork();
 
 protected:
+    /* reimplement with your thread code */
     void run();
 
 public:
-    EventDrivenThread(const QString i_threadName);
+    SimpleThread(const QString& i_threadName);
 };
 
-#endif // EVENTDRIVENTHREAD_H
+#endif // SIMPLETHREAD_H

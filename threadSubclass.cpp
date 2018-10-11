@@ -1,10 +1,13 @@
 #include "threadSubclass.h"
 #include <QDebug>
 
-#include <QTimer>
+#include <QDateTime>
 
-EventDrivenThread::EventDrivenThread(const QString i_threadName)
+SimpleThread::SimpleThread(const QString &i_threadName)
 {
+    // init random seed
+    srand( static_cast<quint32>(QDateTime::currentMSecsSinceEpoch()) );
+
     this->setObjectName(i_threadName);
 
     connect ( this, SIGNAL(started()),  this, SLOT(onStartedSlot()), Qt::QueuedConnection );
@@ -15,32 +18,35 @@ EventDrivenThread::EventDrivenThread(const QString i_threadName)
                  .arg(QThread::currentThread()->objectName());
 }
 
-void EventDrivenThread::doSomeWork()
+
+void SimpleThread::doSomeWork()
 {
-    for (qint64 i = 0; i < 5; i++)
+    for (qint64 i = 0; i < 10; i++)
     {
         QString s("[%1][%2] %3 sheeps... and counting");
         qDebug() << s.arg(this->objectName())
                      .arg(QThread::currentThread()->objectName())
                      .arg(i);
-        QThread::sleep(1);
+        QThread::usleep( (qrand() % 100) * 100 );
     }
 
-    qDebug() << "job Done";
+    qDebug() << QString("[%1][%2] Job Done")
+                .arg(this->objectName())
+                .arg(QThread::currentThread()->objectName());
+
     /* someone could catcth and manage this one */
     emit jobDoneSignal();
 }
 
 
-void EventDrivenThread::onStartedSlot()
+void SimpleThread::onStartedSlot()
 {
     QString s("[%1][%2] thread started");
     qDebug() << s.arg(this->objectName())
                  .arg(QThread::currentThread()->objectName());
-    doSomeWork();
 }
 
-void EventDrivenThread::onFinishedSlot()
+void SimpleThread::onFinishedSlot()
 {
     QString s("[%1][%2] thread stopped");
     qDebug() << s.arg(this->objectName())
@@ -48,9 +54,12 @@ void EventDrivenThread::onFinishedSlot()
 }
 
 
-void EventDrivenThread::run()
+void SimpleThread::run()
 {
-    QString s("[%1][%2] thread event-loop");
+    QString s("[%1][%2] thread run()");
     qDebug() << s.arg(this->objectName())
                  .arg(QThread::currentThread()->objectName());
+
+    // Not an event loop...
+    doSomeWork();
 }
