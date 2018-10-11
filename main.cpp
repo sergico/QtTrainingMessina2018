@@ -1,7 +1,8 @@
 #include <QCoreApplication>
-
-#include "threadSubclass.h"
 #include <QDebug>
+
+#include "threadmanager.h"
+
 
 int main(int argc, char *argv[])
 {
@@ -10,13 +11,7 @@ int main(int argc, char *argv[])
     // name main thread
     QThread::currentThread()->setObjectName("T_MAIN");
 
-    // create a thread
-    SimpleThread theFirstThread("T_FIRST");
-    theFirstThread.start();
-
-    // craete another thread
-    SimpleThread theSecondThread("T_SECOND");
-    theSecondThread.start();
+    ThreadManager theThreadManager;
 
     return a.exec();
 }

@@ -11,11 +11,14 @@ class SimpleThread : public QThread
 signals:
     void jobDoneSignal();
 
+private:
+    void doSomeWork();
+
 protected slots:
     void onStartedSlot();
     void onFinishedSlot();
 
-    void doSomeWork();
+    void onTriggerThreadJobSlot();
 
 protected:
     /* reimplement with your thread code */

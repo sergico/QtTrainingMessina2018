@@ -2,6 +2,7 @@
 #include <QDebug>
 
 #include <QDateTime>
+#include <QTimer>
 
 SimpleThread::SimpleThread(const QString &i_threadName)
 {
@@ -18,6 +19,10 @@ SimpleThread::SimpleThread(const QString &i_threadName)
                  .arg(QThread::currentThread()->objectName());
 }
 
+void SimpleThread::onTriggerThreadJobSlot()
+{
+    doSomeWork();
+}
 
 void SimpleThread::doSomeWork()
 {
@@ -45,8 +50,6 @@ void SimpleThread::onStartedSlot()
     qDebug() << s.arg(this->objectName())
                  .arg(QThread::currentThread()->objectName());
 
-
-    doSomeWork();
 }
 
 void SimpleThread::onFinishedSlot()
