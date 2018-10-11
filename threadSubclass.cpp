@@ -6,7 +6,7 @@
 SimpleThread::SimpleThread(const QString &i_threadName)
 {
     // init random seed
-    srand( static_cast<quint32>(QDateTime::currentMSecsSinceEpoch()) );
+    qsrand( static_cast<quint32>(QDateTime::currentMSecsSinceEpoch()) );
 
     this->setObjectName(i_threadName);
 
@@ -44,6 +44,9 @@ void SimpleThread::onStartedSlot()
     QString s("[%1][%2] thread started");
     qDebug() << s.arg(this->objectName())
                  .arg(QThread::currentThread()->objectName());
+
+
+    doSomeWork();
 }
 
 void SimpleThread::onFinishedSlot()
@@ -60,6 +63,5 @@ void SimpleThread::run()
     qDebug() << s.arg(this->objectName())
                  .arg(QThread::currentThread()->objectName());
 
-    // Not an event loop...
-    doSomeWork();
+    exec();
 }
