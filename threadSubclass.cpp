@@ -5,8 +5,11 @@
 #include <QTimer>
 
 SimpleThread::SimpleThread(const QString &i_threadName) :
-    m_timerPtr(nullptr)
+    m_timerPtr( new QTimer(this) )
 {
+    m_timerPtr->setSingleShot(true);
+    connect( m_timerPtr, SIGNAL(timeout()), this, SLOT(doSomeWork()) );
+
     // init random seed
     qsrand( static_cast<quint32>(QDateTime::currentMSecsSinceEpoch()) );
 
@@ -61,9 +64,6 @@ void SimpleThread::run()
     qDebug() << s.arg(this->objectName())
                  .arg(QThread::currentThread()->objectName());
 
-    m_timerPtr = new QTimer;
-    m_timerPtr->setSingleShot(true);
-    connect( m_timerPtr, SIGNAL(timeout()), SLOT(doSomeWork()), Qt::DirectConnection );
     m_timerPtr->start(1000);
 
     exec();
