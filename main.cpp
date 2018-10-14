@@ -25,5 +25,10 @@ int main(int argc, char *argv[])
     QThreadPool::globalInstance()->start(t1);
     QThreadPool::globalInstance()->start(t2);
 
+    QThreadPool::globalInstance()->waitForDone();
+
+    QThreadPool::globalInstance()->start(t1);
+    QThreadPool::globalInstance()->start(t2);
+
     return a.exec();
 }
