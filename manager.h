@@ -13,15 +13,13 @@ class ThreadManager :public QObject
 {
     Q_OBJECT
 
-    QThread m_workerThread;
+    //QThread m_workerThread;
+    QList<QThread*> m_threadPtrList;
     QList<Worker*> m_workerPtrList;
 
 public:
     ThreadManager()
     {
-        // name the worker thread
-        m_workerThread.setObjectName("T_WORKER_THREAD");
-        // create workers
         createWorker( "W_FIRST" );
         createWorker( "W_SECOND" );
     }
@@ -29,30 +27,39 @@ public:
     ~ThreadManager()
     {
         qDebug() << "Thread manager destroyed... stopping worker thread";
-        m_workerThread.quit();
-        m_workerThread.wait();
+        foreach( QThread* t, m_threadPtrList )
+        {
+            t->quit();
+            t->wait();
+        }
         qDebug() << "Worker thread terminated correctly";
     }
 
     void createWorker(const QString& i_workerName)
     {
+        // create the thread
+        QThread* threadPtr = new QThread;
+        threadPtr->setObjectName( QString("T_").append(i_workerName) );
         // create the worker object
         Worker* workerPtr = new Worker(i_workerName);
         // move worker to thread
-        workerPtr->moveToThread(&m_workerThread);
+        workerPtr->moveToThread(threadPtr);
         // configure signals and slots
-        connect( &m_workerThread, SIGNAL(started()), workerPtr, SLOT(start()) );
-        connect( &m_workerThread, SIGNAL(finished()), workerPtr, SLOT(deleteLater()) );
+        connect( threadPtr, SIGNAL(started()), workerPtr, SLOT(start()) );
+        connect( threadPtr, SIGNAL(finished()), workerPtr, SLOT(deleteLater()) );
         connect( workerPtr, SIGNAL(workerFinishedSignal()), workerPtr, SLOT(deleteLater()) );
         m_workerPtrList.append(workerPtr);
+        m_threadPtrList.append(threadPtr);
     }
 
     void start()
     {
         // start thread
-        m_workerThread.start();
+        foreach(QThread* t, m_threadPtrList)
+        {
+            t->start();
+        }
     }
 };
-
 
 #endif /* NR_THREAD_MANAGER_H */
