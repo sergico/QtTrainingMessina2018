@@ -17,8 +17,13 @@ class RunnableTask : public QRunnable
 public:
     RunnableTask(const QString& i_name) :
         m_name(i_name)
-    {}
-
+    {
+        qDebug() << "Task created:" << m_name;
+    }
+    ~RunnableTask()
+    {
+        qDebug() << "Task destroyed:" << m_name;
+    }
 };
 
 #endif // RUNNABLETASK_H
