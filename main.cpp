@@ -16,14 +16,14 @@ int main(int argc, char *argv[])
     qDebug() << "Maximum no. of threads on my custom pool is " << myCustomeThreadPool.maxThreadCount();
     qDebug() << "No. of my custom pool's thread in use:" << myCustomeThreadPool.activeThreadCount();
 
-    RunnableTask t1("T_ONE");
-    RunnableTask t2("T_TWO");
+    RunnableTask* t1 = new RunnableTask("T_ONE");
+    RunnableTask* t2 = new RunnableTask("T_TWO");
 
-    qDebug() << "t1 Runnable auto delete" << t1.autoDelete();
-    qDebug() << "t2 Runnable auto delete" << t2.autoDelete();
+    qDebug() << "t1 Runnable auto delete" << t1->autoDelete();
+    qDebug() << "t2 Runnable auto delete" << t2->autoDelete();
 
-    QThreadPool::globalInstance()->start(&t1);
-    QThreadPool::globalInstance()->start(&t2);
+    QThreadPool::globalInstance()->start(t1);
+    QThreadPool::globalInstance()->start(t2);
 
     return a.exec();
 }
