@@ -19,6 +19,9 @@ int main(int argc, char *argv[])
     RunnableTask* t1 = new RunnableTask("T_ONE");
     RunnableTask* t2 = new RunnableTask("T_TWO");
 
+    t1->setAutoDelete(false);
+    t2->setAutoDelete(false);
+
     qDebug() << "t1 Runnable auto delete" << t1->autoDelete();
     qDebug() << "t2 Runnable auto delete" << t2->autoDelete();
 
@@ -26,6 +29,8 @@ int main(int argc, char *argv[])
     QThreadPool::globalInstance()->start(t2);
 
     QThreadPool::globalInstance()->waitForDone();
+    qDebug() << "All threads are back to the pool";
+    qDebug() << "No. of my custom pool's thread in use:" << myCustomeThreadPool.activeThreadCount();
 
     QThreadPool::globalInstance()->start(t1);
     QThreadPool::globalInstance()->start(t2);
