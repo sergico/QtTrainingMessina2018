@@ -5,6 +5,8 @@
 #include <QThread>
 #include <QDebug>
 
+#include <QMutex>
+
 extern "C" QString g_sharedResourse;
 
 class StringWriterThread : public QThread
@@ -12,6 +14,7 @@ class StringWriterThread : public QThread
     Q_OBJECT
 
     QString m_tag;
+    QMutex m_localMutex;
 
 signals:
     void syncErrorSignal();
@@ -27,16 +30,20 @@ public:
     {
         while( true )
         {
-            g_sharedResourse = m_tag;
-            if (g_sharedResourse != m_tag)
+            m_localMutex.lock();    // start critical section
             {
-                emit syncErrorSignal();
-                qDebug() << "SYNC ERROR!" << g_sharedResourse;
-                exit (1);
+                g_sharedResourse = m_tag;
+                if ( !g_sharedResourse.contains(m_tag) )
+                {
+                    emit syncErrorSignal();
+                    qDebug() << "SYNC ERROR!" << g_sharedResourse;
+                    exit (1);
+                }
+                qDebug() << QString("[%1] %2")
+                          .arg(QThread::currentThread()->objectName())
+                          .arg(g_sharedResourse);
             }
-            qDebug() << QString("[%1] %2")
-                      .arg(QThread::currentThread()->objectName())
-                      .arg(g_sharedResourse);
+            m_localMutex.unlock();  // terminate critical section
         }
     }
 };
