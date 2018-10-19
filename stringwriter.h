@@ -6,9 +6,11 @@
 #include <QDebug>
 
 #include <QMutex>
+#include <QMutexLocker>
 
 extern "C" QString g_sharedResourse;
 extern "C" QMutex g_mutex;
+
 
 class StringWriterThread : public QThread
 {
@@ -30,20 +32,18 @@ public:
     {
         while( true )
         {
-            g_mutex.lock();    // start critical section
+            // create the locker at the start of the critical section
+            QMutexLocker safeLock( &g_mutex );
+            g_sharedResourse = m_tag;
+            if ( !g_sharedResourse.contains(m_tag) )
             {
-                g_sharedResourse = m_tag;
-                if ( !g_sharedResourse.contains(m_tag) )
-                {
-                    emit syncErrorSignal();
-                    qDebug() << "SYNC ERROR!" << g_sharedResourse;
-                    exit (1);
-                }
-                qDebug() << QString("[%1] %2")
-                          .arg(QThread::currentThread()->objectName())
-                          .arg(g_sharedResourse);
+                emit syncErrorSignal();
+                qDebug() << "SYNC ERROR!" << g_sharedResourse;
+                exit (1);
             }
-            g_mutex.lock();  // terminate critical section... you sure?
+            qDebug() << QString("[%1] %2")
+                      .arg(QThread::currentThread()->objectName())
+                      .arg(g_sharedResourse);
         }
     }
 };
