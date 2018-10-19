@@ -11,6 +11,19 @@
 extern "C" QString g_sharedResourse;
 extern "C" QMutex g_mutex;
 
+class TalkingMutexLocker : public QMutexLocker
+{
+public:
+    TalkingMutexLocker(QMutex* io_mutex) :
+        QMutexLocker(io_mutex)
+    {
+        qDebug() << Q_FUNC_INFO;
+    }
+    ~TalkingMutexLocker()
+    {
+        qDebug() << Q_FUNC_INFO;
+    }
+};
 
 class StringWriterThread : public QThread
 {
@@ -33,7 +46,7 @@ public:
         while( true )
         {
             // create the locker at the start of the critical section
-            QMutexLocker safeLock( &g_mutex );
+            TalkingMutexLocker safeLock( &g_mutex );
             g_sharedResourse = m_tag;
             if ( !g_sharedResourse.contains(m_tag) )
             {
