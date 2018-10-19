@@ -43,7 +43,7 @@ public:
                           .arg(QThread::currentThread()->objectName())
                           .arg(g_sharedResourse);
             }
-            g_mutex.unlock();  // terminate critical section
+            g_mutex.lock();  // terminate critical section... you sure?
         }
     }
 };
