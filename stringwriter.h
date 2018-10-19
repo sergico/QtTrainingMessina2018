@@ -30,13 +30,15 @@ class StringWriterThread : public QThread
     Q_OBJECT
 
     QString m_tag;
+    QMutex m_mutex;
 
 signals:
     void syncErrorSignal();
 
 public:
     StringWriterThread(const QString i_tag) :
-        m_tag(i_tag)
+        m_tag(i_tag),
+        m_mutex(g_mutex)
     {
         this->setObjectName( QString("T_%1").arg(m_tag) );
     }
