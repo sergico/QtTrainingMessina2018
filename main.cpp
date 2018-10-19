@@ -2,13 +2,13 @@
 
 #include <QString>
 #include <QMutex>
-#include "stringwriter.h"
+#include <QSemaphore>
 
+#include "stringwriter.h"
 
 QString g_sharedResourse;
 QMutex g_mutex;
-
-
+QSemaphore g_semaphore(1); // this is a basically a mutex
 
 int main(int argc, char *argv[])
 {

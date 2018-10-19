@@ -7,9 +7,12 @@
 
 #include <QMutex>
 #include <QMutexLocker>
+#include <QSemaphore>
 
 extern "C" QString g_sharedResourse;
 extern "C" QMutex g_mutex;
+extern "C" QSemaphore g_semaphore; // this is a basically a mutex
+
 
 class TalkingMutexLocker : public QMutexLocker
 {
@@ -30,15 +33,13 @@ class StringWriterThread : public QThread
     Q_OBJECT
 
     QString m_tag;
-    QMutex m_mutex;
 
 signals:
     void syncErrorSignal();
 
 public:
     StringWriterThread(const QString i_tag) :
-        m_tag(i_tag),
-        m_mutex(g_mutex)
+        m_tag(i_tag)
     {
         this->setObjectName( QString("T_%1").arg(m_tag) );
     }
@@ -47,8 +48,7 @@ public:
     {
         while( true )
         {
-            // create the locker at the start of the critical section
-            TalkingMutexLocker safeLock( &g_mutex );
+            g_semaphore.acquire();  // mutex.lock()
             g_sharedResourse = m_tag;
             if ( !g_sharedResourse.contains(m_tag) )
             {
@@ -59,6 +59,7 @@ public:
             qDebug() << QString("[%1] %2")
                       .arg(QThread::currentThread()->objectName())
                       .arg(g_sharedResourse);
+            g_semaphore.release(); // mutex.unlock()
         }
     }
 };
