@@ -1,9 +1,13 @@
 #include <QCoreApplication>
 
 #include <QString>
+#include <QMutex>
 #include "stringwriter.h"
 
+
 QString g_sharedResourse;
+QMutex g_mutex;
+
 
 
 int main(int argc, char *argv[])

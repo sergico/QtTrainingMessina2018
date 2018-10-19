@@ -8,13 +8,13 @@
 #include <QMutex>
 
 extern "C" QString g_sharedResourse;
+extern "C" QMutex g_mutex;
 
 class StringWriterThread : public QThread
 {
     Q_OBJECT
 
     QString m_tag;
-    QMutex m_localMutex;
 
 signals:
     void syncErrorSignal();
@@ -30,7 +30,7 @@ public:
     {
         while( true )
         {
-            m_localMutex.lock();    // start critical section
+            g_mutex.lock();    // start critical section
             {
                 g_sharedResourse = m_tag;
                 if ( !g_sharedResourse.contains(m_tag) )
@@ -43,7 +43,7 @@ public:
                           .arg(QThread::currentThread()->objectName())
                           .arg(g_sharedResourse);
             }
-            m_localMutex.unlock();  // terminate critical section
+            g_mutex.unlock();  // terminate critical section
         }
     }
 };
