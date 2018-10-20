@@ -81,4 +81,7 @@ void SimpleUrlDowloader::onSslErrorsSlot(QNetworkReply* i_replyPtr,
     {
         qDebug() << e;
     }
+
+    qDebug() << "!!WARNING!! Ignoring SSL Error on purpose; NOT SECRE AT ALL";
+    i_replyPtr->ignoreSslErrors();
 }
