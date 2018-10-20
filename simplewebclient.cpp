@@ -42,7 +42,7 @@ void SimpleUrlDowloader::onNetworkReplyReadySlot(QNetworkReply* i_reply)
     else
     {
         QByteArray data = i_reply->readAll();
-        qDebug() << "===="<< m_url << "====";
+        qDebug() << "===="<< m_url.toString() << "====";
         qDebug() << data;
         qDebug() << i_reply;
     }

@@ -1,6 +1,7 @@
 #include <QCoreApplication>
 
 #include "simplewebclient.h"
+#include <QUrl>
 
 int main(int argc, char *argv[])
 {
@@ -8,15 +9,20 @@ int main(int argc, char *argv[])
 
     SimpleUrlDowloader theDownloader;
 
-    QString url = "ftp://test.rebex.net/readme.txt";
+    QString urlStr = "ftp://test.rebex.net/readme.txt";
+    QUrl url(urlStr);
+    qDebug() << "Original URL: " << url.toString();
+    url.setUserName("demo");
+    url.setPassword("password");
+    qDebug() << "URL with username & password: " << url.toString();
 
-    if ( theDownloader.download( url ) )
+    if ( theDownloader.download( url.toString() ) )
     {
-        qDebug() << "Downloading " << url;
+        qDebug() << "Downloading " << urlStr;
     }
     else
     {
-        qDebug() << "Error downloading " << url;
+        qDebug() << "Error downloading " << urlStr;
     }
 
     return a.exec();
