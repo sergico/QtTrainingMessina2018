@@ -9,16 +9,13 @@ int main(int argc, char *argv[])
     DnsResolver theResolver;
 
     // valid host name
-    theResolver.resolve("www.netresults.it");
-
-    qDebug() << "";
+    theResolver.asyncResolve("www.netresults.it");
 
     // invalid hostname
-    theResolver.resolve("www.nteresults.it");
+    theResolver.asyncResolve("www.nteresults.it");
 
     // reverse lookup
-    theResolver.resolve("81.31.147.144");
-
+    theResolver.asyncResolve("81.31.147.144");
 
     return a.exec();
 }

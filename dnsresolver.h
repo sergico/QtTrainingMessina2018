@@ -11,16 +11,29 @@ class DnsResolver : public QObject
 {
     Q_OBJECT
 
-protected slots:
-    void asyncResolvedSlot()
+    void printResoved(QHostInfo& i_hostinfo)
     {
+        if ( i_hostinfo.error() != QHostInfo::NoError )
+        {
+            qDebug() << "Error resolving hostname:" << i_hostinfo.errorString();
+        }
+        else
+        {
+            qDebug() << i_hostinfo.addresses() << i_hostinfo.hostName();
+        }
+    }
 
+protected slots:
+    void asyncResolvedSlot(QHostInfo i_hostinfo)
+    {
+        qDebug() << "Completed async dns resolution request with id " << i_hostinfo.lookupId();
+        printResoved( i_hostinfo );
     }
 
 public:
     DnsResolver() {}
 
-    bool resolve(const QString& i_hostname)
+    void resolve(const QString& i_hostname)
     {
         QTime dnsTimeMsec;
         dnsTimeMsec.start();
@@ -32,21 +45,13 @@ public:
                     .arg(i_hostname)
                     .arg(dnsResolveTimeMsec);
 
-        if ( resolvedHostname.error() != QHostInfo::NoError )
-        {
-            qDebug() << "Error resolving hostname:" << resolvedHostname.errorString();
-            return false;
-        }
-        else
-        {
-            qDebug() << resolvedHostname.addresses() << resolvedHostname.hostName();
-            return true;
-        }
+        printResoved( resolvedHostname );
     }
 
     void asyncResolve(const QString& i_hostname)
     {
-
+        int requestId = QHostInfo::lookupHost(i_hostname, this, SLOT(asyncResolvedSlot(QHostInfo)));
+        qDebug() << "async dns resolution request queued with id " << requestId;
     }
 
 };
