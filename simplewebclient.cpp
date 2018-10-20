@@ -37,6 +37,7 @@ void SimpleUrlDowloader::onNetworkReplyReadySlot(QNetworkReply* i_reply)
     if ( QNetworkReply::NoError != i_reply->error())
     {
         qDebug() << "Error downloading " << m_url.toString();
+        qDebug() << "Error is: " << i_reply->errorString();
     }
     else
     {
