@@ -8,7 +8,7 @@ int main(int argc, char *argv[])
 
     SimpleUrlDowloader theDownloader;
 
-    QString url = "ftp://ftp.cs.brown.edu/pub/COPYING_POLICY";
+    QString url = "sftp://test.rebex.net/readme.txt";
 
     if ( theDownloader.download( url ) )
     {

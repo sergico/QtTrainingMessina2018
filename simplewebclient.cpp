@@ -34,9 +34,16 @@ bool SimpleUrlDowloader::download(const QString& i_url)
 
 void SimpleUrlDowloader::onNetworkReplyReadySlot(QNetworkReply* i_reply)
 {
-    QByteArray data = i_reply->readAll();
-    qDebug() << "===="<< m_url << "====";
-    qDebug() << data;
-    qDebug() << i_reply;
+    if ( QNetworkReply::NoError != i_reply->error())
+    {
+        qDebug() << "Error downloading " << m_url.toString();
+    }
+    else
+    {
+        QByteArray data = i_reply->readAll();
+        qDebug() << "===="<< m_url << "====";
+        qDebug() << data;
+        qDebug() << i_reply;
+    }
     i_reply->deleteLater();
 }
