@@ -5,6 +5,8 @@
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkRequest>
 #include <QtNetwork/QNetworkReply>
+#include <QAuthenticator>
+
 
 #include <QUrl>
 #include <QString>
@@ -19,6 +21,7 @@ class SimpleUrlDowloader : public QObject
 
 protected slots:
     void onNetworkReplyReadySlot(QNetworkReply* i_reply);
+    void onAuthenticationRequestSlot(QNetworkReply *reply, QAuthenticator *authenticator);
 
 public:
     SimpleUrlDowloader();

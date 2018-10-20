@@ -5,8 +5,12 @@ SimpleUrlDowloader::SimpleUrlDowloader() :
     m_networkManagerPtr(nullptr)
 {
     m_networkManagerPtr = new QNetworkAccessManager(this);
+
     connect( m_networkManagerPtr, SIGNAL(finished(QNetworkReply*)),
              this,                SLOT(onNetworkReplyReadySlot(QNetworkReply*)) );
+
+    connect( m_networkManagerPtr, SIGNAL(authenticationRequired(QNetworkReply*, QAuthenticator*)),
+             this,                SLOT(onAuthenticationRequestSlot(QNetworkReply*, QAuthenticator*)) );
 }
 
 SimpleUrlDowloader::~SimpleUrlDowloader()
@@ -47,4 +51,13 @@ void SimpleUrlDowloader::onNetworkReplyReadySlot(QNetworkReply* i_reply)
         qDebug() << i_reply;
     }
     i_reply->deleteLater();
+}
+
+void SimpleUrlDowloader::onAuthenticationRequestSlot(QNetworkReply *reply, QAuthenticator *authenticator)
+{
+    Q_UNUSED(reply);
+
+    qDebug() << "Request for Authentication received...";
+    authenticator->setUser("demo");
+    authenticator->setPassword("password");
 }
