@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
 
     SimpleUrlDowloader theDownloader;
 
-    QString urlStr = "ftp://test.rebex.net/readme.txt";
+    QString urlStr = "https://netresults.it";
     QUrl url(urlStr);
 
     if ( theDownloader.download( url.toString() ) )

@@ -11,6 +11,12 @@ SimpleUrlDowloader::SimpleUrlDowloader() :
 
     connect( m_networkManagerPtr, SIGNAL(authenticationRequired(QNetworkReply*, QAuthenticator*)),
              this,                SLOT(onAuthenticationRequestSlot(QNetworkReply*, QAuthenticator*)) );
+
+    connect( m_networkManagerPtr, SIGNAL(encrypted(QNetworkReply*)),
+             this,                SLOT(onEncryptedConnectionSlot(QNetworkReply*)) );
+
+    connect ( m_networkManagerPtr, SIGNAL(sslErrors(QNetworkReply*, const QList<QSslError>&)),
+              this,                SLOT(onSslErrorsSlot(QNetworkReply*, const QList<QSslError>&)) );
 }
 
 SimpleUrlDowloader::~SimpleUrlDowloader()
@@ -60,4 +66,19 @@ void SimpleUrlDowloader::onAuthenticationRequestSlot(QNetworkReply *reply, QAuth
     qDebug() << "Request for Authentication received...";
     authenticator->setUser("demo");
     authenticator->setPassword("password");
+}
+
+void SimpleUrlDowloader::onEncryptedConnectionSlot(QNetworkReply*)
+{
+    qDebug() << "Connection is going to be encrypted... do you extra check here";
+}
+
+void SimpleUrlDowloader::onSslErrorsSlot(QNetworkReply* i_replyPtr,
+                                         const QList<QSslError>& i_sslErrorList)
+{
+    qDebug() << "SSL Errors occurred, please find details below:";
+    foreach( QSslError e, i_sslErrorList )
+    {
+        qDebug() << e;
+    }
 }

@@ -23,6 +23,10 @@ protected slots:
     void onNetworkReplyReadySlot(QNetworkReply* i_reply);
     void onAuthenticationRequestSlot(QNetworkReply *reply, QAuthenticator *authenticator);
 
+    // ssl related slots
+    void onEncryptedConnectionSlot(QNetworkReply*);
+    void onSslErrorsSlot(QNetworkReply* i_replyPtr, const QList<QSslError>& i_sslErrorList);
+
 public:
     SimpleUrlDowloader();
     ~SimpleUrlDowloader();
