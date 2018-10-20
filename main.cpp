@@ -16,5 +16,9 @@ int main(int argc, char *argv[])
     // invalid hostname
     theResolver.resolve("www.nteresults.it");
 
+    // reverse lookup
+    theResolver.resolve("81.31.147.144");
+
+
     return a.exec();
 }

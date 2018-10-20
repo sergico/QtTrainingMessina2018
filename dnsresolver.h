@@ -5,9 +5,18 @@
 #include <QDebug>
 #include <QHostInfo>
 #include <QTime>
+#include <QObject>
 
-class DnsResolver
+class DnsResolver : public QObject
 {
+    Q_OBJECT
+
+protected slots:
+    void asyncResolvedSlot()
+    {
+
+    }
+
 public:
     DnsResolver() {}
 
@@ -30,11 +39,15 @@ public:
         }
         else
         {
-            qDebug() << resolvedHostname.addresses();
+            qDebug() << resolvedHostname.addresses() << resolvedHostname.hostName();
             return true;
         }
     }
 
+    void asyncResolve(const QString& i_hostname)
+    {
+
+    }
 
 };
 
