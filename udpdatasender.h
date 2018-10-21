@@ -18,7 +18,7 @@ class UdpDataSender : public QObject
 protected slots:
     void onDatagramWrittenSlot(qint64 i_byteWritten)
     {
-
+        qDebug() << QString("Written %1 bytes to UDP socket").arg(i_byteWritten);
     }
 
 public:
@@ -28,6 +28,8 @@ public:
         m_udpSocketPtr( new QUdpSocket(this) )
     {
         qDebug() << "Created UDP socket";
+        connect( m_udpSocketPtr, SIGNAL(bytesWritten(qint64)),
+                 this,           SLOT(onDatagramWrittenSlot(qint64)) );
     }
 
     ~UdpDataSender()
