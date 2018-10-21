@@ -5,7 +5,7 @@
 #include <QString>
 #include <QByteArray>
 #include <QDebug>
-#include <QTimer>
+#include <QThread>
 
 class UdpDataSender : public QObject
 {
@@ -64,6 +64,7 @@ public:
                             .arg(m_targetAddress.toString())
                             .arg(m_targetPort);
             }
+            QThread::currentThread()->msleep(500);
         }
     }
 };
