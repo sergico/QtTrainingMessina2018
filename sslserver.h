@@ -8,8 +8,6 @@
 
 #include "mtcommon.h"
 
-#include "UniqLogger.h"
-
 class NrServerConfig
 {
 public:
@@ -18,6 +16,7 @@ public:
         E_BindToSpecificPort,   /*!< bind the server to a single, specific port: \a serverPort  */
         E_BindUsingPortRange    /*!< bint the server to a port range: \a serverMinPort - \a serverMaxPort */
     };
+
     QHostAddress serverAddress; /*!< local server address to bind */
     int serverPort;             /*!< server port used to listen for incoming connections when E_BindToSpecificPort has been specified */
     int serverMinPort; /*!< min server port used to listen for incoming connections when \a E_BindUsingPortRange has been specified */
@@ -32,7 +31,6 @@ public:
     QString internalLoggerId;
     QString logfile;
 
-    WriterConfig logWriterConfig;
     int allowedInactivitySeconds;   /*!< If set to a positive no. (>0) this is the max no. of secs the connection can be
                                          inactive before it is closed */
     int allowedClientsHardLimit;    /*!< If set to a positive no. (>0) this is the max no. of client: any connection request exceeding the hard limit
@@ -62,28 +60,15 @@ class SslServer : public QTcpServer
 
     NrServerConfig m_ServerConfig;
 	QQueue<QSslSocket*> m_sslSocketQ;
-    Logger *m_flogger, *m_clogger;
 
 public:
     explicit SslServer(const NrServerConfig &cfg, QObject *parent = 0);
 
-#if QT_VERSION > 0x050000
     void incomingConnection(qintptr handle);
-#else
-    void incomingConnection(int handle);
-#endif
-
-#if QT_VERSION <= 0x040700
-    QSslSocket* nextSslPendingConnection();
-#else
-    // just use QTcpServer::nextPendingConnection()
-#endif
 
 	bool listen(const QHostAddress &address, quint16 i_minPort, quint16 i_maxPort);
     bool listen();
     bool listen(const QHostAddress &address, quint16 port=0);
-
-    void setLogLevel(int logLevel);
 
 protected slots:
     void onSocketError(QAbstractSocket::SocketError e);

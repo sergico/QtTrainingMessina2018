@@ -1,4 +1,5 @@
 #include "sslserver.h"
+#include <QDebug>
 
 /*!
   \class
@@ -10,9 +11,7 @@ SslServer::SslServer(const NrServerConfig &aSslConfig, QObject *parent) :
     QTcpServer(parent),
     m_ServerConfig(aSslConfig)
 {
-    UniqLogger *ul = UniqLogger::instance(m_ServerConfig.internalLoggerId);
-    m_flogger = ul->createFileLogger("SSL", m_ServerConfig.logfile, m_ServerConfig.logWriterConfig);
-    m_clogger = ul->createConsoleLogger("SSL");
+    qDebug() << "SSL Server created";
 }
 
 
@@ -60,61 +59,48 @@ bool SslServer::listen(const QHostAddress &address, quint16 port)
   \brief we overload the virtual QTcpServer::incomingConnection(int) method in order to start the SSL Encryption
   */
 void
-#if QT_VERSION > 0x050000
 SslServer::incomingConnection(qintptr socketDescriptor)
-#else
-SslServer::incomingConnection(int socketDescriptor)
-#endif
 {
-    //MTSDBG << "############### server reports ssl socket on descriptor: " << socketDescriptor;
 	QSslSocket *serverSocket = new QSslSocket;
     serverSocket->setProtocol(QSsl::AnyProtocol);
     
     MTSDBG << "using ssl socket at address " << serverSocket;
 
-	if (serverSocket->setSocketDescriptor(socketDescriptor)) {
+    if (serverSocket->setSocketDescriptor(socketDescriptor))
+    {
         MTSDBG << "Incoming connection from " << serverSocket->peerAddress().toString() << ":" << serverSocket->peerPort();
         MTSDBG << serverSocket;
-        if (serverSocket->peerAddress().toString().isEmpty()) {
+        if (serverSocket->peerAddress().toString().isEmpty())
+        {
+            qDebug() << QString("Connecting socket seems to be disconnected: aborting!");
 
-            *m_flogger << UNQL::LOG_CRITICAL << "Connecting socket seems to be disconnected: aborting!" << UNQL::eom;
-            *m_clogger << UNQL::LOG_CRITICAL << "Connecting socket seems to be disconnected: aborting!" << UNQL::eom;
             qCritical() << "#########> Connecting socket seems to be disconnected: aborting!";
             serverSocket->abort();
             serverSocket->close();
             serverSocket->deleteLater();
             return;
         }
-        //connect(serverSocket, SIGNAL(encrypted()), this, SLOT(ready()));
 
         qRegisterMetaType<QAbstractSocket::SocketError>("QAbstractSocket::SocketError");
         connect(serverSocket, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(onSocketError(QAbstractSocket::SocketError)));
 
         if (!m_ServerConfig.disableEncryption)
         {
-#if QT_VERSION < 0x050000
-            qRegisterMetaType< QList<QSslError> >("QList<QSslError>");
-#endif
             connect(serverSocket, SIGNAL(sslErrors(QList<QSslError>)), this, SLOT(onSslErrors(QList<QSslError>)));
 
             serverSocket->setLocalCertificate(m_ServerConfig.certfile, QSsl::Pem);
             serverSocket->setPrivateKey(m_ServerConfig.keyfile, QSsl::Rsa, QSsl::Pem, m_ServerConfig.passphrase);
 
-#if QT_VERSION >= 0x050000
-            if(serverSocket->localCertificate().isBlacklisted()) {
-                *m_flogger << UNQL::LOG_CRITICAL << "BlackListed certificate " << m_ServerConfig.certfile << UNQL::eom;
-                *m_clogger << UNQL::LOG_CRITICAL << "BlackListed certificate " << m_ServerConfig.certfile << UNQL::eom;
+            if(serverSocket->localCertificate().isBlacklisted())
+            {
+                qDebug() << QString("BlackListed certificate %1")
+                            .arg( m_ServerConfig.certfile );
             }
-#else
-            if(!serverSocket->localCertificate().isValid()) {
-                *m_flogger << UNQL::LOG_CRITICAL << "Invalid certificate " << m_ServerConfig.certfile << UNQL::eom;
-                *m_clogger << UNQL::LOG_CRITICAL << "Invalid certificate " << m_ServerConfig.certfile << UNQL::eom;
-            }
-#endif
 
-            if(serverSocket->privateKey().isNull()) {
-                *m_flogger << UNQL::LOG_CRITICAL << "Invalid private key (NULL)" << m_ServerConfig.keyfile << UNQL::eom;
-                *m_clogger << UNQL::LOG_CRITICAL << "Invalid private key (NULL)" << m_ServerConfig.keyfile << UNQL::eom;
+            if(serverSocket->privateKey().isNull())
+            {
+                qDebug() << QString("Invalid private key (NULL) %1")
+                            .arg(m_ServerConfig.keyfile);
             }
 
             MTSDBG << "SSL Server key" << serverSocket->privateKey();
@@ -122,46 +108,18 @@ SslServer::incomingConnection(int socketDescriptor)
             serverSocket->startServerEncryption();
         }
 
-#if (QT_VERSION > 0x040700)
         this->addPendingConnection(serverSocket); //this does not work with qt < 4.7
-#else
-        m_sslSocketQ.enqueue(serverSocket);
-#endif
         emit connectedClient();
-	} else {
-
-        *m_flogger << UNQL::LOG_CRITICAL << "Invalid set socket descriptor operation" << UNQL::eom;
-        *m_clogger << UNQL::LOG_CRITICAL << "Invalid set socket descriptor operation" << UNQL::eom;
+    }
+    else
+    {
+        qDebug() << QString("Invalid set socket descriptor operation");
         qCritical() << "Could not set socket descriptor!!! ";
-        delete serverSocket; //FIXME - this might be better replaced by deleteLater()
+        serverSocket->deleteLater();
+        //delete serverSocket; //FIXME - this might be better replaced by deleteLater()
     }
 }
 
-#if (QT_VERSION <= 0x040700)
-/*!
-\brief this method mimics the nextPendingConnection from QTcpServer but returns instead only the SSL connections
-It can be used to handle just ssl connection or to handle generic connenctions with qt < 4.7
-*/
-QSslSocket*
-SslServer::nextSslPendingConnection()
-{
-	return m_sslSocketQ.dequeue();
-}
-#endif
-
-/*
-void SslServer::ready()
-{
-    QSslSocket *sslsock = (QSslSocket*) sender();
-
-    MTSDBG << "socket is encrypted: " << sslsock->isEncrypted();
-
-    *m_flogger << UNQL::LOG_INFO << "Server reports encription established" << UNQL::eom;
-    *m_clogger << UNQL::LOG_INFO << "Server reports encription established" << UNQL::eom;
-	
-    emit connectedClient();
-}
-*/
 
 void SslServer::onSocketError(QAbstractSocket::SocketError e)
 {
@@ -172,25 +130,14 @@ void SslServer::onSocketError(QAbstractSocket::SocketError e)
 
         QString err = "Server reports error: %1 / peer address: %2:%3";
         err = err.arg(sock->errorString()).arg(sock->peerAddress().toString()).arg(sock->peerPort());
-        *m_flogger << UNQL::LOG_WARNING << err << UNQL::eom;
-        *m_clogger << UNQL::LOG_WARNING << err << UNQL::eom;
 
+        qDebug() << QString("WARNING %1").arg(err);
         MTSDBG << "current socket state" << sock->state();
-#if (QT_VERSION <= 0x040700)
-        QSslSocket *ssock = dynamic_cast<QSslSocket*>(sock);
-        if (ssock) {
-            MTSDBG << "socket is still contained in the Q:" << m_sslSocketQ.contains(ssock);
-            if (ssock->state() == QTcpSocket::UnconnectedState || ssock->state() == QTcpSocket::ClosingState) {
-                MTSDBG << "socket is unconnected, the map now is:" << m_sslSocketQ.size() << m_sslSocketQ;
-            }
-        }
-#endif
     }
     else
     {
         QString err = "Socket error event received but the socket is invalid (null)";
-        *m_flogger << UNQL::LOG_CRITICAL << err << UNQL::eom;
-        *m_clogger << UNQL::LOG_CRITICAL << err << UNQL::eom;
+        qDebug() << QString("CRITICAL %1").arg(err);
     }
 }
 
@@ -203,15 +150,13 @@ void SslServer::onSslErrors(QList<QSslError> aErrorList)
     foreach (QSslError se, aErrorList) {
 		if (se != QSslError::NoError) {
             MTSDBG << se.errorString();
-			*m_flogger << UNQL::LOG_CRITICAL << "Server reports SSL error: " << se.errorString() << UNQL::eom;
-			*m_clogger << UNQL::LOG_CRITICAL << "Server reports SSL error: " << se.errorString() << UNQL::eom;
+            qDebug() << QString("CRITICAL Server reports SSL error: %1").arg(se.errorString());
             if (se.error() == QSslError::SelfSignedCertificate || se.error() == QSslError::SelfSignedCertificateInChain)
 			{
 				if (m_ServerConfig.allowUntrustedCerts) {
                     MTSDBG << "Cert is SelfSigned... but we're ok with that...";
-					*m_flogger << UNQL::LOG_INFO << "Client certificate is untrusted but we're ok with that" << UNQL::eom;
-					*m_clogger << UNQL::LOG_INFO << "Client certificate is untrusted but we're ok with that"  << UNQL::eom;
-					errorsToIgnore << se;
+                    qDebug() << QString("WARNING: Client certificate is untrusted but we're ok with that");
+                    errorsToIgnore << se;
 				}
 			}
 		}
@@ -220,13 +165,13 @@ void SslServer::onSslErrors(QList<QSslError> aErrorList)
     QSslSocket *sslsock = (QSslSocket*) sender();
     if (sslsock) {
         if (m_ServerConfig.ignoreSslErrors) {
-            *m_flogger << UNQL::LOG_WARNING << "There were SSL errors but server is configured to ignore them all" << UNQL::eom;
-            *m_clogger << UNQL::LOG_WARNING << "There were SSL errors but server is configured to ignore them all" << UNQL::eom;
+            qDebug() << QString("There were SSL errors but server is configured to ignore them all");
+
             sslsock->ignoreSslErrors();
         }
         else {
-            *m_flogger << UNQL::LOG_WARNING << "Ignoring some SSL errors..." << UNQL::eom;
-            *m_clogger << UNQL::LOG_WARNING << "Ignoring some SSL errors..." << UNQL::eom;
+            qDebug() << QString("Ignoring some SSL errors...");
+
             if (errorsToIgnore.count() > 0)
                 sslsock->ignoreSslErrors(errorsToIgnore);
         }
@@ -234,7 +179,4 @@ void SslServer::onSslErrors(QList<QSslError> aErrorList)
     }
 }
  
-void SslServer::setLogLevel(int logLevel)
-{
-    if (m_flogger) m_flogger->setVerbosityAcceptedLevel(logLevel);
-}
+
