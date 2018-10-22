@@ -41,6 +41,15 @@ protected slots:
         this->sendSomeData( dataToSend );
     }
 
+    void onSslSocketErrorSlot(const QList<QSslError>& i_errors)
+    {
+        qDebug() << "SSL ERROR... connection might be unsecure... BEWARE!";
+        foreach ( QSslError e, i_errors )
+        {
+            qDebug() << QString("- %1").arg(e.errorString());
+        }
+    }
+
     void onSslSocketDisconnectedSlot()
     {
         qDebug() << QString("TCP socket disconnected");
@@ -90,9 +99,13 @@ public:
         connect( m_sslSocketPtr, SIGNAL(bytesWritten(qint64)),
                  this,           SLOT(onBytesWrittenSlot(qint64)) );
 
+        /* Enctyption specific sig/slots */
+
         connect( m_sslSocketPtr, SIGNAL(encrypted()),
                  this,           SLOT(onSslSocketEncryptedSlot()) );
 
+        connect( m_sslSocketPtr, SIGNAL(sslErrors(const QList<QSslError>&)),
+                 this,           SLOT(onSslSocketErrorSlot(const QList<QSslError>&)) );
     }
 
     ~TcpSender()
