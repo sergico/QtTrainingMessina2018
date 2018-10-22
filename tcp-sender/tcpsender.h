@@ -6,13 +6,13 @@
 #include <QString>
 #include <QDebug>
 #include <QTimer>
-
+#include <QSslSocket>
 
 class TcpSender : public QObject
 {
     Q_OBJECT
 
-    QTcpSocket* m_tcpSocketPtr;
+    QSslSocket* m_sslSocketPtr;
 
     QHostAddress m_targetAddress;
     quint16      m_targetPort;
@@ -21,32 +21,39 @@ class TcpSender : public QObject
     qint32      m_bytesWritten;
 
 protected slots:
-    void onTcpSocketConnectedSlot()
+    void onSslSocketConnectedSlot()
     {
-        qDebug() << QString("TCP socket connected!");
-        qDebug() << QString("Now we are ready to send data");
+        qDebug() << QString("SSl socket connected!");
+        qDebug() << QString("Now we are ready to send data... NOT ENCRYPTED YET!");
+    }
+
+    void onSslSocketEncryptedSlot()
+    {
+        qDebug() << QString("SSl socket connected!");
+        qDebug() << QString("Now we are ready to send data... NOT ENCRYPTED YET!");
         QTimer::singleShot(100, this, SLOT(sendDataSlot()) );
     }
+
     void sendDataSlot()
     {
         QString dataToSend;
-        dataToSend = "This is the stream of data we want to send...";
+        dataToSend = "This is the stream of data we want to send... but no one will be able to read it!!!!";
         this->sendSomeData( dataToSend );
     }
 
-    void onTcpSocketDisconnectedSlot()
+    void onSslSocketDisconnectedSlot()
     {
         qDebug() << QString("TCP socket disconnected");
     }
 
-    void onTcpSocketErrorSlot(QAbstractSocket::SocketError socketError)
+    void onSslSocketErrorSlot(QAbstractSocket::SocketError socketError)
     {
         qDebug() << QString("TCP socket error! / %1 / %2")
-                    .arg(m_tcpSocketPtr->errorString())
+                    .arg(m_sslSocketPtr->errorString())
                     .arg(socketError);
 
-        m_tcpSocketPtr->close();
-        m_tcpSocketPtr->deleteLater();
+        m_sslSocketPtr->close();
+        m_sslSocketPtr->deleteLater();
     }
 
     void onBytesWrittenSlot(qint64 i_bw)
@@ -57,13 +64,13 @@ protected slots:
                     .arg(m_bytesToWrite);
         if ( m_bytesToWrite == m_bytesWritten )
         {
-            m_tcpSocketPtr->disconnectFromHost();
+            m_sslSocketPtr->disconnectFromHost();
         }
     }
 
 public:
     TcpSender(const QString& i_address, quint16 i_port) :
-        m_tcpSocketPtr( new QTcpSocket(this) ),
+        m_sslSocketPtr( new QSslSocket(this) ),
         m_targetAddress(i_address),
         m_targetPort(i_port),
         m_bytesToWrite(0),
@@ -71,40 +78,47 @@ public:
     {
         qDebug() << "TCP Socket created";
 
-        connect( m_tcpSocketPtr, SIGNAL(connected()),
-                 this,           SLOT(onTcpSocketConnectedSlot()) );
+        connect( m_sslSocketPtr, SIGNAL(connected()),
+                 this,           SLOT(onSslSocketConnectedSlot()) );
 
-        connect( m_tcpSocketPtr, SIGNAL(disconnected()),
-                 this,           SLOT(onTcpSocketDisconnectedSlot()) );
+        connect( m_sslSocketPtr, SIGNAL(disconnected()),
+                 this,           SLOT(onSslSocketDisconnectedSlot()) );
 
-        connect( m_tcpSocketPtr, SIGNAL(error(QAbstractSocket::SocketError)),
-                 this,           SLOT(onTcpSocketErrorSlot(QAbstractSocket::SocketError)) );
+        connect( m_sslSocketPtr, SIGNAL(error(QAbstractSocket::SocketError)),
+                 this,           SLOT(onSslSocketErrorSlot(QAbstractSocket::SocketError)) );
 
-        connect( m_tcpSocketPtr, SIGNAL(bytesWritten(qint64)),
+        connect( m_sslSocketPtr, SIGNAL(bytesWritten(qint64)),
                  this,           SLOT(onBytesWrittenSlot(qint64)) );
+
+        connect( m_sslSocketPtr, SIGNAL(encrypted()),
+                 this,           SLOT(onSslSocketEncryptedSlot()) );
+
     }
 
     ~TcpSender()
     {
-        m_tcpSocketPtr->close();
-        m_tcpSocketPtr->deleteLater();
+        m_sslSocketPtr->close();
+        m_sslSocketPtr->deleteLater();
     }
 
     void connecteMe()
     {
-        m_tcpSocketPtr->connectToHost(m_targetAddress, m_targetPort);
+#if (0)
+        m_sslSocketPtr->connectToHost(m_targetAddress, m_targetPort);
+#endif
+        m_sslSocketPtr->connectToHostEncrypted(m_targetAddress.toString(), m_targetPort);
     }
 
     void disconnectMe()
     {
-        m_tcpSocketPtr->close();
+        m_sslSocketPtr->close();
     }
 
     void sendSomeData(const QString& i_data)
     {
         m_bytesToWrite = i_data.size();
 
-        int bw = m_tcpSocketPtr->write(i_data.toUtf8());
+        int bw = m_sslSocketPtr->write(i_data.toUtf8());
         if ( bw != m_bytesToWrite )
         {
             qDebug() << "!!WARNING!! Partal write... or error";
