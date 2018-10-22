@@ -7,6 +7,7 @@
 #include <QDebug>
 #include <QTimer>
 
+
 class TcpSender : public QObject
 {
     Q_OBJECT

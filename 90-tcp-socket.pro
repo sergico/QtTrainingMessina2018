@@ -1,4 +1,5 @@
 TEMPLATE = subdirs
 
 SUBDIRS += \
-    tcp-sender
+    tcp-sender \
+    tcp-server
