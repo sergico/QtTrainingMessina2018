@@ -48,6 +48,10 @@ protected slots:
         {
             qDebug() << QString("- %1").arg(e.errorString());
         }
+        /*
+         * !!WARNING!! Do it at your own risk
+         */
+        m_sslSocketPtr->ignoreSslErrors();
     }
 
     void onSslSocketDisconnectedSlot()
