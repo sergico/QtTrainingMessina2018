@@ -5,7 +5,7 @@
 #include <QHostAddress>
 #include <QString>
 #include <QDebug>
-
+#include <QTimer>
 
 class TcpSender : public QObject
 {
@@ -19,11 +19,18 @@ class TcpSender : public QObject
     qint32      m_bytesToWrite;
     qint32      m_bytesWritten;
 
-
 protected slots:
     void onTcpSocketConnectedSlot()
     {
         qDebug() << QString("TCP socket connected!");
+        qDebug() << QString("Now we are ready to send data");
+        QTimer::singleShot(100, this, SLOT(sendDataSlot()) );
+    }
+    void sendDataSlot()
+    {
+        QString dataToSend;
+        dataToSend = "This is the stream of data we want to send...";
+        this->sendSomeData( dataToSend );
     }
 
     void onTcpSocketDisconnectedSlot()
@@ -87,6 +94,11 @@ public:
         m_tcpSocketPtr->connectToHost(m_targetAddress, m_targetPort);
     }
 
+    void disconnectMe()
+    {
+        m_tcpSocketPtr->close();
+    }
+
     void sendSomeData(const QString& i_data)
     {
         m_bytesToWrite = i_data.size();
@@ -100,11 +112,6 @@ public:
                 qDebug() << "!!CRITICAL!! this was an error... ";
             }
         }
-    }
-
-    void disconnectMe()
-    {
-        m_tcpSocketPtr->close();
     }
 
 };

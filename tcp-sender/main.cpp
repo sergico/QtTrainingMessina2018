@@ -14,13 +14,14 @@ int main(int argc, char *argv[])
     TcpSender theSender( targetAddress, targetPort );
     theSender.connecteMe();
 
-    QString dataToSend;
-    dataToSend = "This is the stream of data we want to send...";
 
     /*
      *   nc -l 127.0.0.1 5432
      */
-    theSender.sendSomeData( dataToSend );
+    QString dataToSend;
+    dataToSend = "This is the stream of data we want to send...";
+
+    //theSender.sendSomeData( dataToSend );
 
     return a.exec();
 }
