@@ -33,4 +33,30 @@ It should work with Qt 5.9+ with little to no changes
   - 07-mutex-copy
   - 08-semaphore-101
   - 09-rendevouz
+- 50-qnetwokmanager.git
+  - 01-http-request
+  - 02-ftp-request
+  - 03-network-reply-error
+  - 04-url-authentication
+  - 05-authenticator
+  - 06-ssl-errors
+  - 07-ignore-ssl-errors
+- 60-qhostinfo
+  - 01-sync-resolve
+  - 02-reverse-lookup
+  - 03-async-resolution
+- 70-udp-socket
+  - 01-write-datagram
+  - 02-read-datagram
+- 80-qssl-server
+  - 01-ssl-server-ok
+- 90-tcp-socket
+  - 01-buggy-tcp-send
+  - 02-tcp-sender-fixed
+  - 03-ts-server
+  - 04-ssl-socket-errors
+  - 05-print-ssl-errors
+  - 06-ignore-ssl-errors
+
+
 
