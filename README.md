@@ -3,6 +3,7 @@
 All code has been compiled and tested with *Qt 5.6.3* 
 
 It should work with Qt 5.9+ with little to no changes
+Below are the git tag (divided by sub-project) to be used to get the various version of the sample code.
 
 - 01-LookMa_Threads
   - 01-thread-id
